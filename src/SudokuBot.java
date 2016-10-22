@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class SudokuBot {
@@ -23,6 +25,28 @@ public class SudokuBot {
 			br.close();
 		}
 	}
+	
+	public static void writeResult(){
+		BufferedWriter writer = null;
+        try {
+            File file = new File("solution.txt");
+            writer = new BufferedWriter(new FileWriter(file));
+            for(int i =0;i<9;i++){
+    			for(int j=0;j<9;j++){
+    				writer.write(grid[i][j]+ " ");
+    			}
+    			writer.write('\n');
+    		}
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                writer.close();
+            } catch (Exception e) {
+            }
+        }
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -30,11 +54,6 @@ public class SudokuBot {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		for(int i =0;i<9;i++){
-			for(int j=0;j<9;j++){
-				System.out.print(grid[i][j]+ " ");
-			}
-			System.out.println();
-		}
+		writeResult();
 	}
 }
