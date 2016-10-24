@@ -159,7 +159,7 @@ public class SudokuBot {
 	}
 
 	public static void solveDepthFirst(int x, int y, String[][] newGrid) {
-		if (!newGrid[x][y].equals("*")) {
+		if (!newGrid[y][x].equals("*")) {
 			if (x == 8 && y == 8) {
 				return;
 			}
@@ -170,22 +170,24 @@ public class SudokuBot {
 			}
 
 		} else {
-			ArrayList<String> possibleMoves = possibleMoves(x, y, newGrid);
+			ArrayList<String> possibleMoves = possibleMoves(y, x, newGrid);
 			if (possibleMoves.isEmpty()) {
 				return;
 			}
 			for (int i = possibleMoves.size() - 1; i >= 0; i--) {
 				stack.push(possibleMoves.get(i));
 			}
-			newGrid[x][y] = stack.pop() + "";
-			if (x == 8 && y == 8) {
-				grid = newGrid;
-				return;
-			}
-			if (x == 8) {
-				solveDepthFirst(0, y + 1, newGrid);
-			} else {
-				solveDepthFirst(x + 1, y, newGrid);
+			while(!stack.isEmpty()) {
+				newGrid[y][x] = stack.pop() + "";
+				if (x == 8 && y == 8) {
+					grid = newGrid;
+					return;
+				}
+				if (x == 8) {
+					solveDepthFirst(0, y + 1, newGrid);
+				} else {
+					solveDepthFirst(x + 1, y, newGrid);
+				}
 			}
 		}
 	}
