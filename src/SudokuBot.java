@@ -14,8 +14,8 @@ public class SudokuBot {
 
 	private static String[][] grid = new String[9][9];
 	private static ArrayList<String> placements = new ArrayList<String>();
-	private static Stack stack = new Stack();
-	private static Queue queue = new LinkedList<>();
+	private static boolean gameOver = false;
+	private static ArrayList<String[][]> visited = new ArrayList<String[][]>();
 
 	public static void readInput(String fileName) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -231,79 +231,115 @@ public class SudokuBot {
 		return possibleMoves;
 	}
 
-	public static boolean DFS (int i, int j, String[][] grid) {
-		
-		if (!grid[i][j].equals("*")) {
-			if (i == 8 && j == 8) {
-				return checkGoal(grid);
-			}
-			if (j == 8) {
-				DFS(i + 1 , 0, grid);
-			} else {
-				DFS(j + 1, i, grid);
+	public static boolean isGameOver(String[][] newGrid) {
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				if (newGrid[i][j].equals("*")) {
+					return false;
+				}
 			}
 		}
-		
-		return false;
+		return true;
+	}
 
-		
+	public static int[] getFirstEmptyCell(String[][] currentState) {
+		int[] index = new int[2];
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				if (currentState[i][j].equals("*")) {
+					index[0] = i;
+					index[1] = j;
+					return index;
+				}
+			}
+		}
+		return null;
 	}
 	
-	public static void solveDepthFirst(int x, int y, String[][] newGrid) {
-		if (!newGrid[y][x].equals("*")) {
-			if (x == 8 && y == 8) {
+	
+	
+	public static void dfs(String[][] newGrid) {
+		if(!gameOver) {
+			int[] index = getFirstEmptyCell(newGrid);
+			if (index == null) {
+				if(checkGoal(newGrid)) {
+					grid=deepCopy(newGrid);
+					writeResult();
+					System.out.println("Done!!");
+					gameOver=true;
+					return;
+				}
 				return;
 			}
-			if (x == 8) {
-				solveDepthFirst(0, y + 1, newGrid);
-			} else {
-				solveDepthFirst(x + 1, y, newGrid);
-			}
-
-		} else {
-			ArrayList<String> possibleMoves = possibleMoves(y, x, newGrid);
-			if (possibleMoves.isEmpty()) {
-				if (x == 0) {
-					newGrid[y - 1][8] = stack.pop() + "";
-				} else {
-					newGrid[y][x - 1] = stack.pop() + "";
-				}
-				if (x == 8 && y == 8) {
-					grid = newGrid;
-					return;
-				}
-				if (x == 8) {
-					solveDepthFirst(0, y + 1, newGrid);
-				} else {
-					solveDepthFirst(x + 1, y, newGrid);
-				}
-			}
-			for (int i = possibleMoves.size() - 1; i >= 0; i--) {
-				stack.push(possibleMoves.get(i));
-			}
-			while (!stack.isEmpty()) {
-				newGrid[y][x] = stack.pop() + "";
-				if (x == 8 && y == 8) {
-					grid = newGrid;
-					return;
-				}
-				if (x == 8) {
-					solveDepthFirst(0, y + 1, newGrid);
-				} else {
-					solveDepthFirst(x + 1, y, newGrid);
+			int x = index[0];
+			int y = index[1];
+			for (int i = 1; i <= 10; i++) {
+				if(i<=9) {
+					newGrid[x][y] = i + "";
+					dfs(newGrid);
+				}else {
+					newGrid[x][y] ="*";	
 				}
 			}
 		}
+	}
+	
+	public static String[][] deepCopy(String[][] original) {
+	    if (original == null) {
+	        return null;
+	    }
+
+	    final String[][] result = new String[original.length][];
+	    for (int i = 0; i < original.length; i++) {
+	        result[i] = Arrays.copyOf(original[i], original[i].length);
+	        // For Java versions prior to Java 6 use the next:
+	        // System.arraycopy(original[i], 0, result[i], 0, original[i].length);
+	    }
+	    return result;
+	}
+	
+	public static void bfs(String [][] newGrid) {
+			Queue<String[][]> queue = new LinkedList<String[][]>();
+			queue.add(newGrid);
+			while(!queue.isEmpty() && !gameOver) {
+				String [][] node = deepCopy((String[][])queue.remove());
+				int [] index = getFirstEmptyCell(node);
+				if(index!=null) {
+					int x = index[0];
+					int y = index[1];
+					for(int i=1;i<=9;i++) {
+						String [][] child=new String[9][9];
+						child=deepCopy(node);
+						child[x][y]=i+"";
+						if(checkGoal(child)) {
+							grid=child;
+							writeResult();
+							System.out.println("Done!!");
+							gameOver=true;
+							return;
+						}
+						queue.add(child);
+					}
+				}
+			}
+	}
+	
+	public static int[] getMostConstrained(String [][] newGrid) {
+		int [] index = new int[2];
+		
+		return index;
+	}
+	
+	public static void mostConstrainedCellFirst(String[][] newGrid) {
+		
 	}
 
 	public static void main(String[] args) {
 		try {
-			readInput("GoalCheck.txt");
+			readInput("input_example2.txt");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println(checkGoal(grid));
-		// solveDepthFirst(0, 0, grid);
-		// writeResult();
+		dfs(grid);
 	}
 }
