@@ -60,9 +60,82 @@ public class SudokuBot {
 		}
 	}
 
-	public static ArrayList<String> possibleMoves(int x, int y, String[][] newGrid) {
-		ArrayList<String> possibleMoves = new ArrayList<String>(
-				Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9"));
+	public static boolean checkGoal(String[][] grid) {
+		// For Full Board Checking
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				if (grid[i][j].equals("*")) {
+					System.out.println("stars");
+					return false;
+				}
+			}
+		}
+		// For Row Checking
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				for (int j2 = 0; j2 < 9; j2++) {
+					if (j != j2) {
+						if (grid[i][j].equals(grid[i][j2])) {
+							System.out.println("row");
+							System.out
+									.println("[" + i + "]" + "[" + j + "]"
+											+ " with " + "[" + i + "]" + "["
+											+ j2 + "]");
+							return false;
+						}
+					}
+				}
+			}
+		}
+		// For Column Checking
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				for (int j3 = 0; j3 < 9; j3++) {
+					if (j != j3) {
+						if (grid[j][i].equals(grid[j3][i])) {
+							System.out.println("column");
+							System.out
+									.println("[" + j + "]" + "[" + i + "]"
+											+ " with " + "[" + j3 + "]" + "["
+											+ i + "]");
+							return false;
+						}
+					}
+				}
+			}
+		}
+		// For Box Checking
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				int boxRowOffset = (i / 3) * 3;
+				int boxColOffset = (j / 3) * 3;
+				for (int k = 0; k < 3; k++) {
+					for (int m = 0; m < 3; m++) {
+						if ((boxRowOffset + k) != i || (boxColOffset + m) != j) {
+							if (grid[i][j]
+									.equals(grid[boxRowOffset + k][boxColOffset
+											+ m])) {
+								System.out.println("box");
+								System.out.println("[" + i + "]" + "[" + j
+										+ "]" + " with " + "["
+										+ (boxRowOffset + k) + "]" + "["
+										+ (boxColOffset + m) + "]");
+								return false;
+							}
+						}
+					}
+				}
+
+			}
+		}
+
+		return true;
+	}
+
+	public static ArrayList<String> possibleMoves(int x, int y,
+			String[][] newGrid) {
+		ArrayList<String> possibleMoves = new ArrayList<String>(Arrays.asList(
+				"1", "2", "3", "4", "5", "6", "7", "8", "9"));
 		for (int i = 0; i < 9; i++) {
 			if (!newGrid[i][y].equals("*")) {
 				possibleMoves.remove(newGrid[i][y]);
@@ -205,7 +278,7 @@ public class SudokuBot {
 					newGrid[x][y] = i + "";
 					dfs(newGrid);
 				}else {
-					newGrid[x][y] ="*";
+					newGrid[x][y] ="*";	
 				}
 			}
 		}
@@ -267,6 +340,6 @@ public class SudokuBot {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		bfs(grid);
+		dfs(grid);
 	}
 }
