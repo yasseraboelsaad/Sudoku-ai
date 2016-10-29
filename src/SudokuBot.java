@@ -15,6 +15,7 @@ public class SudokuBot {
 	private static String[][] grid = new String[9][9];
 	private static ArrayList<String> placements = new ArrayList<String>();
 	private static boolean gameOver = false;
+	private static ArrayList<String[][]> visited = new ArrayList<String[][]>();
 
 	public static void readInput(String fileName) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -172,7 +173,7 @@ public class SudokuBot {
 		int[] index = new int[2];
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				if (grid[i][j].equals("*")) {
+				if (currentState[i][j].equals("*")) {
 					index[0] = i;
 					index[1] = j;
 					return index;
@@ -182,85 +183,14 @@ public class SudokuBot {
 		return null;
 	}
 	
-	public static boolean checkGoal(String[][] grid) {
-		// For Full Board Checking
-		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) {
-				if (grid[i][j].equals("*")) {
-//					System.out.println("stars");
-					return false;
-				}
-			}
-		}
-		// For Row Checking
-		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) {
-				for (int j2 = 0; j2 < 9; j2++) {
-					if (j != j2) {
-						if (grid[i][j].equals(grid[i][j2])) {
-//							System.out.println("row");
-//							System.out
-//									.println("[" + i + "]" + "[" + j + "]"
-//											+ " with " + "[" + i + "]" + "["
-//											+ j2 + "]");
-							return false;
-						}
-					}
-				}
-			}
-		}
-		// For Column Checking
-		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) {
-				for (int j3 = 0; j3 < 9; j3++) {
-					if (j != j3) {
-						if (grid[j][i].equals(grid[j3][i])) {
-//							System.out.println("column");
-//							System.out
-//									.println("[" + j + "]" + "[" + i + "]"
-//											+ " with " + "[" + j3 + "]" + "["
-//											+ i + "]");
-							return false;
-						}
-					}
-				}
-			}
-		}
-		// For Box Checking
-		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) {
-				int boxRowOffset = (i / 3) * 3;
-				int boxColOffset = (j / 3) * 3;
-				for (int k = 0; k < 3; k++) {
-					for (int m = 0; m < 3; m++) {
-						if ((boxRowOffset + k) != i || (boxColOffset + m) != j) {
-							if (grid[i][j]
-									.equals(grid[boxRowOffset + k][boxColOffset
-											+ m])) {
-//								System.out.println("box");
-//								System.out.println("[" + i + "]" + "[" + j
-//										+ "]" + " with " + "["
-//										+ (boxRowOffset + k) + "]" + "["
-//										+ (boxColOffset + m) + "]");
-								return false;
-							}
-						}
-					}
-				}
-
-			}
-		}
-
-		return true;
-	}
-
+	
 	
 	public static void dfs(String[][] newGrid) {
 		if(!gameOver) {
 			int[] index = getFirstEmptyCell(newGrid);
 			if (index == null) {
 				if(checkGoal(newGrid)) {
-					grid=newGrid;
+					grid=deepCopy(newGrid);
 					writeResult();
 					System.out.println("Done!!");
 					gameOver=true;
@@ -280,6 +210,56 @@ public class SudokuBot {
 			}
 		}
 	}
+	
+	public static String[][] deepCopy(String[][] original) {
+	    if (original == null) {
+	        return null;
+	    }
+
+	    final String[][] result = new String[original.length][];
+	    for (int i = 0; i < original.length; i++) {
+	        result[i] = Arrays.copyOf(original[i], original[i].length);
+	        // For Java versions prior to Java 6 use the next:
+	        // System.arraycopy(original[i], 0, result[i], 0, original[i].length);
+	    }
+	    return result;
+	}
+	
+	public static void bfs(String [][] newGrid) {
+			Queue<String[][]> queue = new LinkedList<String[][]>();
+			queue.add(newGrid);
+			while(!queue.isEmpty() && !gameOver) {
+				String [][] node = deepCopy((String[][])queue.remove());
+				int [] index = getFirstEmptyCell(node);
+				if(index!=null) {
+					int x = index[0];
+					int y = index[1];
+					for(int i=1;i<=9;i++) {
+						String [][] child=new String[9][9];
+						child=deepCopy(node);
+						child[x][y]=i+"";
+						if(checkGoal(child)) {
+							grid=child;
+							writeResult();
+							System.out.println("Done!!");
+							gameOver=true;
+							return;
+						}
+						queue.add(child);
+					}
+				}
+			}
+	}
+	
+	public static int[] getMostConstrained(String [][] newGrid) {
+		int [] index = new int[2];
+		
+		return index;
+	}
+	
+	public static void mostConstrainedCellFirst(String[][] newGrid) {
+		
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -287,6 +267,6 @@ public class SudokuBot {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		dfs(grid);
+		bfs(grid);
 	}
 }
