@@ -15,6 +15,7 @@ public class SudokuBot {
 	private static String[][] grid = new String[9][9];
 	private static ArrayList<String> placements = new ArrayList<String>();
 	private static boolean gameOver = false;
+	private static String filename;
 
 	public static void readInput(String fileName) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -36,7 +37,7 @@ public class SudokuBot {
 	public static void writeResult(String[][] newGrid) {
 		BufferedWriter writer = null;
 		try {
-			File file = new File("solution.txt");
+			File file = new File("Solution "+filename);
 			writer = new BufferedWriter(new FileWriter(file));
 			for (int i = 0; i < 9; i++) {
 				for (int j = 0; j < 9; j++) {
@@ -447,14 +448,14 @@ public class SudokuBot {
 			if (index != null) {
 				int x = index[0];
 				int y = index[1];
-				ArrayList<String> pMoves= possibleMoves(x, y, node); 
-				for (int i = 0; i < pMoves.size(); i++) {
-					String[][] newDomain=forwardCheck(x,y, pMoves.get(i), domains);
+				String pMoves= domains[x][y]; 
+				for (int i = 0; i < pMoves.length(); i++) {
+					String[][] newDomain=forwardCheck(x,y, ""+pMoves.charAt(i), domains);
 					if(nullChecker(domains, newDomain)) {
 						domains=deepCopy(newDomain);
 						String[][] child = new String[9][9];
 						child = deepCopy(node);
-						child[x][y] = pMoves.get(i) + "";
+						child[x][y] = pMoves.charAt(i) + "";
 						if (checkGoal(child)) {
 							writePlacements2(child);
 							writeResult(child);
@@ -513,14 +514,14 @@ public class SudokuBot {
 			if (index != null) {
 				int x = index[0];
 				int y = index[1];
-				ArrayList<String> pMoves= possibleMoves(x, y, node); 
-				for (int i = 0; i < pMoves.size(); i++) {
-					String[][] newDomain=recurrsiveForwardCheck(x,y, pMoves.get(i), domains);
+				String pMoves= domains[x][y]; 
+				for (int i = 0; i < pMoves.length(); i++) {
+					String[][] newDomain=recurrsiveForwardCheck(x,y, ""+pMoves.charAt(i), domains);
 					if(nullChecker(domains, newDomain)) {
 						domains=deepCopy(newDomain);
 						String[][] child = new String[9][9];
 						child = deepCopy(node);
-						child[x][y] = pMoves.get(i) + "";
+						child[x][y] = pMoves.charAt(i) + "";
 						if (checkGoal(child)) {
 							writePlacements2(child);
 							writeResult(child);
@@ -537,7 +538,8 @@ public class SudokuBot {
 
 	public static void main(String[] args) {
 		try {
-			readInput("input_example.txt");
+			filename = "example3.txt";
+			readInput(filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
