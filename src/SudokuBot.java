@@ -75,7 +75,11 @@ public class SudokuBot {
 				for (int j2 = 0; j2 < 9; j2++) {
 					if (j != j2) {
 						if (grid[i][j].equals(grid[i][j2])) {
-							return false;
+							if (!grid[i][j2].equals("8")
+									&& !grid[i][j2].equals("9")) {
+
+								return false;
+							}
 						}
 					}
 				}
@@ -87,7 +91,11 @@ public class SudokuBot {
 				for (int j3 = 0; j3 < 9; j3++) {
 					if (j != j3) {
 						if (grid[j][i].equals(grid[j3][i])) {
-							return false;
+							if (!grid[j3][i].equals("8")
+									&& !grid[j3][i].equals("9")) {
+
+								return false;
+							}
 						}
 					}
 				}
@@ -101,8 +109,16 @@ public class SudokuBot {
 				for (int k = 0; k < 3; k++) {
 					for (int m = 0; m < 3; m++) {
 						if ((boxRowOffset + k) != i || (boxColOffset + m) != j) {
-							if (grid[i][j].equals(grid[boxRowOffset + k][boxColOffset + m])) {
-								return false;
+							if (grid[i][j]
+									.equals(grid[boxRowOffset + k][boxColOffset
+											+ m])) {
+								if (!grid[boxRowOffset + k][boxColOffset + m]
+										.equals("8")
+										&& !grid[boxRowOffset + k][boxColOffset
+												+ m].equals("9")) {
+
+									return false;
+								}
 							}
 						}
 					}
@@ -114,9 +130,10 @@ public class SudokuBot {
 		return true;
 	}
 
-	public static ArrayList<String> possibleMoves(int x, int y, String[][] newGrid) {
-		ArrayList<String> possibleMoves = new ArrayList<String>(
-				Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9"));
+	public static ArrayList<String> possibleMoves(int x, int y,
+			String[][] newGrid) {
+		ArrayList<String> possibleMoves = new ArrayList<String>(Arrays.asList(
+				"1", "2", "3", "4", "5", "6", "7", "8", "9"));
 		for (int i = 0; i < 9; i++) {
 			if (!newGrid[i][y].equals("*")) {
 				possibleMoves.remove(newGrid[i][y]);
@@ -309,27 +326,28 @@ public class SudokuBot {
 		int[][] numberOfMoves = new int[9][9];
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				numberOfMoves[i][j]=10;
+				numberOfMoves[i][j] = 10;
 			}
 		}
 		int[] indexOfFirstEmpty = getFirstEmptyCell(newGrid);
-		int x=indexOfFirstEmpty[0];
+		int x = indexOfFirstEmpty[0];
 		int y = indexOfFirstEmpty[1];
-		numberOfMoves[x][y]=possibleMoves(x, y, newGrid).size();
-		int smallestX=x;
-		int smallestY=y;
+		numberOfMoves[x][y] = possibleMoves(x, y, newGrid).size();
+		int smallestX = x;
+		int smallestY = y;
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				if(newGrid[i][j].equals("*")) {
-					if(possibleMoves(i, j, newGrid).size()<possibleMoves(smallestX, smallestY, newGrid).size()) {
-						smallestX=i;
-						smallestY=j;
+				if (newGrid[i][j].equals("*")) {
+					if (possibleMoves(i, j, newGrid).size() < possibleMoves(
+							smallestX, smallestY, newGrid).size()) {
+						smallestX = i;
+						smallestY = j;
 					}
 				}
 			}
 		}
-		index[0]=smallestX;
-		index[1]=smallestY;
+		index[0] = smallestX;
+		index[1] = smallestY;
 		return index;
 	}
 
@@ -342,7 +360,7 @@ public class SudokuBot {
 			if (index != null) {
 				int x = index[0];
 				int y = index[1];
-				ArrayList<String> pMoves= possibleMoves(x, y, node); 
+				ArrayList<String> pMoves = possibleMoves(x, y, node);
 				for (int i = 0; i < pMoves.size(); i++) {
 					String[][] child = new String[9][9];
 					child = deepCopy(node);
@@ -359,62 +377,67 @@ public class SudokuBot {
 			}
 		}
 	}
-	
-	public static String[][] getAllDomains(String [][] newGrid){
-		String [][] domains = new String[9][9];
-		for(int i = 0; i<9;i++) {
-			for(int j=0;j<9;j++) {
-				if(newGrid[j][i].equals("*")) {
+
+	public static String[][] getAllDomains(String[][] newGrid) {
+		String[][] domains = new String[9][9];
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				if (newGrid[j][i].equals("*")) {
 					ArrayList<String> temp = possibleMoves(j, i, newGrid);
-					String temp2="";
-					for(int k=0;k<temp.size();k++) {
-						temp2=temp2+temp.get(k);
-						domains[j][i]=temp2;
+					String temp2 = "";
+					for (int k = 0; k < temp.size(); k++) {
+						temp2 = temp2 + temp.get(k);
+						domains[j][i] = temp2;
 					}
 				}
 			}
 		}
 		return domains;
 	}
-	
-	public static String [][] forwardCheck(int x, int y, String i, String [][] newGrid) {
-		String [][] domains = deepCopy(newGrid);
-		for(int j=0;j<9;j++) {
-			if(newGrid[x][j]!=null && newGrid[x][j].contains(i+"")) {
-				domains[x][j]=domains[x][j].replace(i+"", "");
+
+	public static String[][] forwardCheck(int x, int y, String i,
+			String[][] newGrid) {
+		String[][] domains = deepCopy(newGrid);
+		for (int j = 0; j < 9; j++) {
+			if (newGrid[x][j] != null && newGrid[x][j].contains(i + "")) {
+				domains[x][j] = domains[x][j].replace(i + "", "");
 			}
 		}
-		
-		for(int j=0;j<9;j++) {
-			if(newGrid[j][y]!=null &&newGrid[j][y].contains(i+"")) {
-				domains[j][y]=domains[j][y].replace(i+"", "");
+
+		for (int j = 0; j < 9; j++) {
+			if (newGrid[j][y] != null && newGrid[j][y].contains(i + "")) {
+				domains[j][y] = domains[j][y].replace(i + "", "");
 			}
 		}
-		
-		int boxRowOffset = (x / 3)*3;
-        int boxColOffset = (y / 3)*3;
-        for (int k = 0; k < 3; ++k) // box
-            for (int m = 0; m < 3; ++m)
-            	if(newGrid[boxRowOffset+k][boxColOffset+m]!=null && newGrid[boxRowOffset+k][boxColOffset+m].contains(i+"")) {
-            		domains[boxRowOffset+k][boxColOffset+m]=domains[boxRowOffset+k][boxColOffset+m].replace(i+"", "");
-    			}
-		
+
+		int boxRowOffset = (x / 3) * 3;
+		int boxColOffset = (y / 3) * 3;
+		for (int k = 0; k < 3; ++k)
+			// box
+			for (int m = 0; m < 3; ++m)
+				if (newGrid[boxRowOffset + k][boxColOffset + m] != null
+						&& newGrid[boxRowOffset + k][boxColOffset + m]
+								.contains(i + "")) {
+					domains[boxRowOffset + k][boxColOffset + m] = domains[boxRowOffset
+							+ k][boxColOffset + m].replace(i + "", "");
+				}
+
 		return domains;
 	}
-	
-	public static boolean nullChecker(String[][] oldDomain, String [][] newDomain) {
+
+	public static boolean nullChecker(String[][] oldDomain, String[][] newDomain) {
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				if (oldDomain[i][j]!=null && newDomain[i][j]==null) {
+				if (oldDomain[i][j] != null && newDomain[i][j] == null) {
 					return false;
 				}
 			}
 		}
 		return true;
 	}
-	
-	public static void forwardChecking(String [][] newGrid) {
-		String [][] domains = deepCopy(getAllDomains(newGrid));
+
+	public static void forwardChecking(String[][] newGrid) {
+		String[][] domains = deepCopy(getAllDomains(newGrid));
 		Queue<String[][]> queue = new LinkedList<String[][]>();
 		queue.add(newGrid);
 		while (!queue.isEmpty() && !gameOver) {
@@ -423,11 +446,12 @@ public class SudokuBot {
 			if (index != null) {
 				int x = index[0];
 				int y = index[1];
-				ArrayList<String> pMoves= possibleMoves(x, y, node); 
+				ArrayList<String> pMoves = possibleMoves(x, y, node);
 				for (int i = 0; i < pMoves.size(); i++) {
-					String[][] newDomain=forwardCheck(x,y, pMoves.get(i), domains);
-					if(nullChecker(domains, newDomain)) {
-						domains=deepCopy(newDomain);
+					String[][] newDomain = forwardCheck(x, y, pMoves.get(i),
+							domains);
+					if (nullChecker(domains, newDomain)) {
+						domains = deepCopy(newDomain);
 						String[][] child = new String[9][9];
 						child = deepCopy(node);
 						child[x][y] = pMoves.get(i) + "";
@@ -444,43 +468,51 @@ public class SudokuBot {
 			}
 		}
 	}
-	
-	public static String [][] recurrsiveForwardCheck(int x, int y, String i, String [][] newGrid) {
-		String [][] domains = deepCopy(newGrid);
-		for(int j=0;j<9;j++) {
-			if(newGrid[x][j]!=null && newGrid[x][j].contains(i+"")) {
-				domains[x][j]=domains[x][j].replace(i+"", "");
-				if(domains[x][j].length()==1) {
+
+	public static String[][] recurrsiveForwardCheck(int x, int y, String i,
+			String[][] newGrid) {
+		String[][] domains = deepCopy(newGrid);
+		for (int j = 0; j < 9; j++) {
+			if (newGrid[x][j] != null && newGrid[x][j].contains(i + "")) {
+				domains[x][j] = domains[x][j].replace(i + "", "");
+				if (domains[x][j].length() == 1) {
 					recurrsiveForwardCheck(x, j, domains[x][j], domains);
 				}
 			}
 		}
-		
-		for(int j=0;j<9;j++) {
-			if(newGrid[j][y]!=null &&newGrid[j][y].contains(i+"")) {
-				domains[j][y]=domains[j][y].replace(i+"", "");
-				if(domains[j][y].length()==1) {
+
+		for (int j = 0; j < 9; j++) {
+			if (newGrid[j][y] != null && newGrid[j][y].contains(i + "")) {
+				domains[j][y] = domains[j][y].replace(i + "", "");
+				if (domains[j][y].length() == 1) {
 					recurrsiveForwardCheck(j, y, domains[j][y], domains);
 				}
 			}
 		}
-		
-		int boxRowOffset = (x / 3)*3;
-        int boxColOffset = (y / 3)*3;
-        for (int k = 0; k < 3; ++k) // box
-            for (int m = 0; m < 3; ++m)
-            	if(newGrid[boxRowOffset+k][boxColOffset+m]!=null && newGrid[boxRowOffset+k][boxColOffset+m].contains(i+"")) {
-            		domains[boxRowOffset+k][boxColOffset+m]=domains[boxRowOffset+k][boxColOffset+m].replace(i+"", "");
-            		if(domains[boxRowOffset+k][boxColOffset+m].length()==1) {
-    					recurrsiveForwardCheck(boxRowOffset+k, boxColOffset+m, domains[boxRowOffset+k][boxColOffset+m], domains);
-    				}
-    			}
-		
+
+		int boxRowOffset = (x / 3) * 3;
+		int boxColOffset = (y / 3) * 3;
+		for (int k = 0; k < 3; ++k)
+			// box
+			for (int m = 0; m < 3; ++m)
+				if (newGrid[boxRowOffset + k][boxColOffset + m] != null
+						&& newGrid[boxRowOffset + k][boxColOffset + m]
+								.contains(i + "")) {
+					domains[boxRowOffset + k][boxColOffset + m] = domains[boxRowOffset
+							+ k][boxColOffset + m].replace(i + "", "");
+					if (domains[boxRowOffset + k][boxColOffset + m].length() == 1) {
+						recurrsiveForwardCheck(boxRowOffset + k, boxColOffset
+								+ m,
+								domains[boxRowOffset + k][boxColOffset + m],
+								domains);
+					}
+				}
+
 		return domains;
 	}
-	
-	public static void maintainingArcConsistensy(String [][] newGrid) {
-		String [][] domains = deepCopy(getAllDomains(newGrid));
+
+	public static void maintainingArcConsistensy(String[][] newGrid) {
+		String[][] domains = deepCopy(getAllDomains(newGrid));
 		Queue<String[][]> queue = new LinkedList<String[][]>();
 		queue.add(newGrid);
 		while (!queue.isEmpty() && !gameOver) {
@@ -489,11 +521,12 @@ public class SudokuBot {
 			if (index != null) {
 				int x = index[0];
 				int y = index[1];
-				ArrayList<String> pMoves= possibleMoves(x, y, node); 
+				ArrayList<String> pMoves = possibleMoves(x, y, node);
 				for (int i = 0; i < pMoves.size(); i++) {
-					String[][] newDomain=recurrsiveForwardCheck(x,y, pMoves.get(i), domains);
-					if(nullChecker(domains, newDomain)) {
-						domains=deepCopy(newDomain);
+					String[][] newDomain = recurrsiveForwardCheck(x, y,
+							pMoves.get(i), domains);
+					if (nullChecker(domains, newDomain)) {
+						domains = deepCopy(newDomain);
 						String[][] child = new String[9][9];
 						child = deepCopy(node);
 						child[x][y] = pMoves.get(i) + "";
@@ -513,11 +546,11 @@ public class SudokuBot {
 
 	public static void main(String[] args) {
 		try {
-			readInput("example3.txt");
+			readInput("GoalCheck.txt");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		maintainingArcConsistensy(grid);
+
+		System.out.println(checkGoal(grid));
 	}
 }
