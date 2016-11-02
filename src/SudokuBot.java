@@ -15,7 +15,6 @@ public class SudokuBot {
 	private static String[][] grid = new String[9][9];
 	private static ArrayList<String> placements = new ArrayList<String>();
 	private static boolean gameOver = false;
-	private static ArrayList<String[][]> visited = new ArrayList<String[][]>();
 
 	public static void readInput(String fileName) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -34,14 +33,14 @@ public class SudokuBot {
 		}
 	}
 
-	public static void writeResult() {
+	public static void writeResult(String[][] newGrid) {
 		BufferedWriter writer = null;
 		try {
 			File file = new File("solution.txt");
 			writer = new BufferedWriter(new FileWriter(file));
 			for (int i = 0; i < 9; i++) {
 				for (int j = 0; j < 9; j++) {
-					writer.write(grid[i][j] + " ");
+					writer.write(newGrid[i][j] + " ");
 				}
 				writer.write('\n');
 			}
@@ -242,8 +241,7 @@ public class SudokuBot {
 			int[] index = getFirstEmptyCell(newGrid);
 			if (index == null) {
 				if (checkGoal(newGrid)) {
-					grid = deepCopy(newGrid);
-					writeResult();
+					writeResult(newGrid);
 					System.out.println("Done!!");
 					gameOver = true;
 					return;
@@ -255,7 +253,9 @@ public class SudokuBot {
 			for (int i = 1; i <= 10; i++) {
 				if (i <= 9) {
 					newGrid[x][y] = i + "";
+					placements.add(x+" "+y+" "+i);
 					dfs(newGrid);
+					placements.remove(x+" "+y+" "+i);
 				} else {
 					newGrid[x][y] = "*";
 				}
@@ -263,6 +263,30 @@ public class SudokuBot {
 		}
 	}
 
+	public static void writePlacements(String [][] newGrid) {
+		for(int i=0;i<9;i++) {
+			for(int j=0;j<9;j++) {
+				if(grid[i][j].equals("*")) {
+					placements.add(i+ " "+j+" "+newGrid[i][j]);
+				}
+			}
+		}
+	}
+	
+	public static void writePlacements2(String [][] newGrid) {
+		if(getFirstEmptyCell(grid)==null) {
+			return;
+		}
+		int[] index = getMostConstrained(grid);
+		if (index != null) {
+			int x = index[0];
+			int y = index[1];
+			placements.add(x+" "+y+" "+newGrid[x][y]);
+			grid[x][y]=newGrid[x][y];
+			writePlacements2(newGrid);
+		}
+	}
+	
 	public static String[][] deepCopy(String[][] original) {
 		if (original == null) {
 			return null;
@@ -292,8 +316,8 @@ public class SudokuBot {
 					child = deepCopy(node);
 					child[x][y] = i + "";
 					if (checkGoal(child)) {
-						grid = child;
-						writeResult();
+						writePlacements(child);
+						writeResult(child);
 						System.out.println("Done!!");
 						gameOver = true;
 						return;
@@ -348,8 +372,8 @@ public class SudokuBot {
 					child = deepCopy(node);
 					child[x][y] = pMoves.get(i) + "";
 					if (checkGoal(child)) {
-						grid = child;
-						writeResult();
+						writePlacements2(child);
+						writeResult(child);
 						System.out.println("Done!!");
 						gameOver = true;
 						return;
@@ -432,8 +456,8 @@ public class SudokuBot {
 						child = deepCopy(node);
 						child[x][y] = pMoves.get(i) + "";
 						if (checkGoal(child)) {
-							grid = child;
-							writeResult();
+							writePlacements2(child);
+							writeResult(child);
 							System.out.println("Done!!");
 							gameOver = true;
 							return;
@@ -498,8 +522,8 @@ public class SudokuBot {
 						child = deepCopy(node);
 						child[x][y] = pMoves.get(i) + "";
 						if (checkGoal(child)) {
-							grid = child;
-							writeResult();
+							writePlacements2(child);
+							writeResult(child);
 							System.out.println("Done!!");
 							gameOver = true;
 							return;
@@ -513,11 +537,10 @@ public class SudokuBot {
 
 	public static void main(String[] args) {
 		try {
-			readInput("example3.txt");
+			readInput("input_example.txt");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		maintainingArcConsistensy(grid);
+		maintainingArcConsistensy(deepCopy(grid));
 	}
 }
